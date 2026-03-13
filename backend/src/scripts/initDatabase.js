@@ -10,6 +10,7 @@ async function initDatabase() {
       port: process.env.DB_PORT || 3306,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
+      multipleStatements: true,
     });
 
     const dbName = process.env.DB_NAME;
@@ -29,8 +30,7 @@ async function initDatabase() {
 
     console.log("Ejecutando schema inicial...");
 
-    await connection.query(sql);
-
+    await connection.query(sql, [], { multipleStatements: true });
     console.log("Base de datos inicializada correctamente");
 
     await connection.end();
