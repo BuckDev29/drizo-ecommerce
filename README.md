@@ -20,8 +20,7 @@ Proyecto orientado a portafolio profesional: autenticacion con JWT, carrito, wis
 ```text
 drizo-ecommerce/
 ├── backend/            # API REST (Express + MySQL)
-├── frontend-next/      # Web app (Next.js)
-├── database/           # SQL para levantar features y parches
+├── frontend/           # Web app (Next.js)
 ├── .gitignore
 └── README.md
 ```
@@ -62,7 +61,7 @@ DB_NAME=drizo_ecommerce
 
 ### Frontend
 
-Crea `frontend-next/.env.local` a partir de `frontend-next/.env.example`.
+Crea `frontend/.env.local` a partir de `frontend/.env.example`.
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000/api
@@ -83,7 +82,7 @@ cd drizo-ecommerce
 cd backend
 npm install
 
-cd ../frontend-next
+cd ../frontend
 npm install
 ```
 
@@ -91,7 +90,7 @@ npm install
 
 ```bash
 cp backend/.env.example backend/.env
-cp frontend-next/.env.example frontend-next/.env.local
+cp frontend/.env.example frontend/.env.local
 ```
 
 Completa tus credenciales locales de MySQL y tu JWT secret.
@@ -108,7 +107,7 @@ Backend disponible en `http://localhost:5000`.
 ### 5. Levantar frontend
 
 ```bash
-cd frontend-next
+cd frontend
 npm run dev
 ```
 
@@ -116,14 +115,14 @@ Frontend disponible en `http://localhost:3000`.
 
 ## Base de Datos
 
-Scripts disponibles en `database/`:
+Scripts disponibles en `backend/src/database/sql/`:
 
 - `feature_setup.sql`
 - `user_preference_patch.sql`
 
 Recomendado para dejar el repositorio totalmente reproducible:
 
-- agregar `database/schema.sql` con tablas base (`users`, `products`, `categories`, `orders`, etc.)
+- agregar `backend/src/database/init.sql` con tablas base (`users`, `products`, `categories`, `orders`, etc.)
 
 ## Endpoints Base
 

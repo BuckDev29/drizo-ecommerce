@@ -1,21 +1,33 @@
+const fs = require("fs");
+const path = require("path");
 const db = require("../config/db");
 
-async function run() {
+async function runMigrations() {
   try {
-    console.log("Adding image_url column to categories table...");
-    await db.query(
-      "ALTER TABLE categories ADD COLUMN image_url VARCHAR(255) NULL",
+    const migrationsPath = path.join(__dirname, "../database/sql");
+
+    const files = fs.readdirSync(migrationsPath);
+
+    const migrationFiles = files.filter(
+      (file) => file !== "feature_setup.sql" && file.endsWith(".sql"),
     );
-    console.log("Column added successfully!");
-  } catch (error) {
-    if (error.code === "ER_DUP_FIELDNAME") {
-      console.log("Column image_url already exists.");
-    } else {
-      console.error("Error adding column:", error);
+
+    for (const file of migrationFiles) {
+      const filePath = path.join(migrationsPath, file);
+
+      console.log(`Ejecutando migración: ${file}`);
+
+      const sql = fs.readFileSync(filePath, "utf8");
+
+      await db.query(sql);
     }
-  } finally {
-    process.exit(0);
+
+    console.log("Migraciones completadas");
+
+    process.exit();
+  } catch (error) {
+    console.error("Error en migraciones:", error);
   }
 }
 
-run();
+runMigrations();
