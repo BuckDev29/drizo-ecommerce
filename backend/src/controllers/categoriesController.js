@@ -1,6 +1,5 @@
 const db = require("../config/db");
 
-// CREATE
 exports.createCategory = async (req, res) => {
   try {
     const { name, gender, image_url } = req.body;
@@ -19,7 +18,6 @@ exports.createCategory = async (req, res) => {
   }
 };
 
-// GET ALL
 exports.getCategories = async (req, res) => {
   try {
     const { gender } = req.query;
@@ -42,7 +40,6 @@ exports.getCategories = async (req, res) => {
   }
 };
 
-// GET ONE
 exports.getCategory = async (req, res) => {
   try {
     const [categories] = await db.query(
@@ -61,7 +58,6 @@ exports.getCategory = async (req, res) => {
   }
 };
 
-// UPDATE
 exports.updateCategory = async (req, res) => {
   try {
     const { name, gender, image_url } = req.body;
@@ -83,7 +79,6 @@ exports.updateCategory = async (req, res) => {
   }
 };
 
-// DELETE
 exports.deleteCategory = async (req, res) => {
   try {
     const [result] = await db.query("DELETE FROM categories WHERE id = ?", [

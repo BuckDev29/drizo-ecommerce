@@ -1,7 +1,5 @@
 const db = require("../config/db");
 
-/* CREATE PRODUCT */
-
 exports.createProduct = async (req, res) => {
   try {
     const { name, price, stock, image_url, category_id } = req.body;
@@ -20,8 +18,6 @@ exports.createProduct = async (req, res) => {
       .json({ message: "Error creando producto", error: error.message });
   }
 };
-
-/* GET ALL PRODUCTS */
 
 exports.getProducts = async (req, res) => {
   try {
@@ -49,7 +45,6 @@ exports.getProducts = async (req, res) => {
           conditions.push("p.category_id = ?");
           params.push(catData[0].id);
         } else {
-          // If slug doesn't exist, return empty
           return res.json([]);
         }
       }
@@ -85,8 +80,6 @@ exports.getProducts = async (req, res) => {
   }
 };
 
-/* GET PRODUCT BY ID */
-
 exports.getProductById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -106,8 +99,6 @@ exports.getProductById = async (req, res) => {
       .json({ message: "Error obteniendo producto", error: error.message });
   }
 };
-
-/* UPDATE PRODUCT */
 
 exports.updateProduct = async (req, res) => {
   try {
@@ -146,8 +137,6 @@ exports.updateProduct = async (req, res) => {
       .json({ message: "Error actualizando producto", error: error.message });
   }
 };
-
-/* DELETE PRODUCT */
 
 exports.deleteProduct = async (req, res) => {
   try {

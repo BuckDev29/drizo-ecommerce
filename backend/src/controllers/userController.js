@@ -1,13 +1,12 @@
 const db = require("../config/db");
 const bcrypt = require("bcryptjs");
 
-/* GET USER PROFILE */
 exports.getProfile = async (req, res) => {
   try {
     const userId = req.user.id;
     const [users] = await db.query(
       "SELECT id, name, email, role, shopping_preference, created_at FROM users WHERE id = ?",
-      [userId]
+      [userId],
     );
 
     if (users.length === 0) {
@@ -18,19 +17,19 @@ exports.getProfile = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Error al obtener perfil",
-      error: error.message
+      error: error.message,
     });
   }
 };
 
-/* UPDATE USER PROFILE */
 exports.updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
     const { name, password, shopping_preference } = req.body;
 
-    // Verificar si el usuario existe
-    const [users] = await db.query("SELECT * FROM users WHERE id = ?", [userId]);
+    const [users] = await db.query("SELECT * FROM users WHERE id = ?", [
+      userId,
+    ]);
     if (users.length === 0) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
@@ -58,7 +57,7 @@ exports.updateProfile = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Error al actualizar perfil",
-      error: error.message
+      error: error.message,
     });
   }
 };

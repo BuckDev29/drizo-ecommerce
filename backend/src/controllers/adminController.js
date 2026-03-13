@@ -1,7 +1,6 @@
 const db = require("../config/db");
 const bcrypt = require("bcryptjs");
 
-/* DASHBOARD STATS */
 exports.getDashboardStats = async (req, res) => {
   try {
     const [[{ totalUsers }]] = await db.query(
@@ -42,7 +41,6 @@ exports.getDashboardStats = async (req, res) => {
   }
 };
 
-/* GET ALL USERS */
 exports.getAllUsers = async (req, res) => {
   try {
     const [users] = await db.query(
@@ -56,7 +54,6 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-/* GET USER BY ID */
 exports.getUserById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -77,7 +74,6 @@ exports.getUserById = async (req, res) => {
   }
 };
 
-/* UPDATE USER (name, email, role, password) */
 exports.updateUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -90,7 +86,7 @@ exports.updateUser = async (req, res) => {
 
     const current = users[0];
 
-    // Check email uniqueness if changed
+    // Si el email cambió, verificamos que no lo tenga otro usuario
     if (email && email !== current.email) {
       const [existing] = await db.query(
         "SELECT id FROM users WHERE email = ? AND id != ?",
@@ -126,12 +122,11 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-/* DELETE USER */
 exports.deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Prevent admin from deleting themselves
+    // Un admin no puede borrarse a sí mismo
     if (parseInt(id) === req.user.id) {
       return res
         .status(400)
@@ -152,11 +147,6 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-/* ─────────────────────────────────────────
-   ADMIN ORDER MANAGEMENT
-───────────────────────────────────────── */
-
-/* GET ALL ORDERS */
 exports.getAllOrders = async (req, res) => {
   try {
     const { status, payment_status } = req.query;
@@ -195,7 +185,6 @@ exports.getAllOrders = async (req, res) => {
   }
 };
 
-/* GET ORDER DETAIL (admin) */
 exports.getOrderDetail = async (req, res) => {
   try {
     const { id } = req.params;
@@ -231,7 +220,6 @@ exports.getOrderDetail = async (req, res) => {
   }
 };
 
-/* UPDATE ORDER STATUS */
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;

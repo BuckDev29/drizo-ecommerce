@@ -1,10 +1,5 @@
 const db = require("../config/db");
 
-/* ─────────────────────────────────────────
-   CHECKOUT — Create order from cart
-   POST /api/orders
-   Body: { address_id, payment_method, notes? }
-───────────────────────────────────────── */
 exports.createOrder = async (req, res) => {
   const conn = await db.getConnection();
   try {
@@ -21,7 +16,6 @@ exports.createOrder = async (req, res) => {
         .json({ message: "address_id y payment_method son requeridos" });
     }
 
-    // Verify address belongs to user
     const [addresses] = await conn.query(
       "SELECT id FROM addresses WHERE id = ? AND user_id = ?",
       [address_id, userId],
@@ -32,7 +26,7 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: "Dirección no válida" });
     }
 
-    // Get cart items with current product prices
+    // Leemos el carrito con los precios actuales, por si alguno cambió
     const [cartItems] = await conn.query(
       `SELECT c.product_id, c.quantity, p.price, p.stock, p.name
        FROM cart_items c
@@ -47,7 +41,7 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: "El carrito está vacío" });
     }
 
-    // Validate stock for all items
+    // Verificamos que haya stock suficiente para cada producto
     for (const item of cartItems) {
       if (item.quantity > item.stock) {
         await conn.rollback();
@@ -58,13 +52,11 @@ exports.createOrder = async (req, res) => {
       }
     }
 
-    // Calculate total
     const totalPrice = cartItems.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0,
     );
 
-    // Create order
     const [orderResult] = await conn.query(
       `INSERT INTO orders (user_id, address_id, payment_method, total_price, notes)
        VALUES (?, ?, ?, ?, ?)`,
@@ -78,7 +70,7 @@ exports.createOrder = async (req, res) => {
     );
     const orderId = orderResult.insertId;
 
-    // Create order items and decrease stock
+    // Guardamos cada item y descontamos el inventario
     for (const item of cartItems) {
       await conn.query(
         "INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)",
@@ -90,7 +82,7 @@ exports.createOrder = async (req, res) => {
       ]);
     }
 
-    // Clear cart
+    // Vaciamos el carrito al confirmar la compra
     await conn.query("DELETE FROM cart_items WHERE user_id = ?", [userId]);
 
     await conn.commit();
@@ -110,10 +102,6 @@ exports.createOrder = async (req, res) => {
   }
 };
 
-/* ─────────────────────────────────────────
-   GET MY ORDERS
-   GET /api/orders
-───────────────────────────────────────── */
 exports.getMyOrders = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -137,10 +125,6 @@ exports.getMyOrders = async (req, res) => {
   }
 };
 
-/* ─────────────────────────────────────────
-   GET ORDER DETAIL
-   GET /api/orders/:id
-───────────────────────────────────────── */
 exports.getOrderById = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -177,10 +161,6 @@ exports.getOrderById = async (req, res) => {
   }
 };
 
-/* ─────────────────────────────────────────
-   CANCEL ORDER (user can cancel if pending)
-   PUT /api/orders/:id/cancel
-───────────────────────────────────────── */
 exports.cancelOrder = async (req, res) => {
   const conn = await db.getConnection();
   try {
@@ -203,14 +183,12 @@ exports.cancelOrder = async (req, res) => {
     if (orders[0].status !== "pending") {
       await conn.rollback();
       conn.release();
-      return res
-        .status(400)
-        .json({
-          message: "Solo se pueden cancelar órdenes en estado 'pending'",
-        });
+      return res.status(400).json({
+        message: "Solo se pueden cancelar órdenes en estado 'pending'",
+      });
     }
 
-    // Restore stock
+    // Devolvemos el stock de los productos cancelados
     const [items] = await conn.query(
       "SELECT product_id, quantity FROM order_items WHERE order_id = ?",
       [id],
