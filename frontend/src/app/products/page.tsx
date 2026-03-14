@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import ProductList from "@/components/Product/ProductList";
 
 export const metadata = {
@@ -8,7 +9,9 @@ export const metadata = {
 export default function ProductsPage() {
   return (
     <main className="min-h-screen bg-white">
-      <ProductList />
+      <Suspense fallback={null}>
+        <ProductList />
+      </Suspense>
     </main>
   );
 }

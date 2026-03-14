@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import CategoryList from "@/components/Category/CategoryList";
 
 export const metadata = {
@@ -8,9 +9,9 @@ export const metadata = {
 export default function CategoriesPage() {
   return (
     <main className="min-h-screen bg-white">
-
-
-      <CategoryList />
+      <Suspense fallback={null}>
+        <CategoryList />
+      </Suspense>
     </main>
   );
 }
