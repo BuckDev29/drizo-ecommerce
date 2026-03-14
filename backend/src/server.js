@@ -1,6 +1,5 @@
 require("dotenv").config();
 
-const initDatabase = require("./scripts/initDatabase");
 const express = require("express");
 const cors = require("cors");
 const db = require("./config/db");
@@ -28,7 +27,6 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/admin", adminRoutes);
 
-initDatabase();
 app.get("/", (req, res) => {
   res.json({ message: "Urban E-commerce API running 🚀" });
 });
