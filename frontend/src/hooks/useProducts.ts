@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Product } from "@/types";
+import { buildApiUrl } from "@/lib/api";
 
 interface UseProductsOptions {
   category?: string;
@@ -19,7 +20,7 @@ export function useProducts(options: UseProductsOptions = {}) {
       setError(null);
 
       try {
-        let url = new URL("http://localhost:5000/api/products");
+        let url = new URL(buildApiUrl("products"));
         if (options.category) url.searchParams.append("category", options.category);
         if (options.gender) url.searchParams.append("gender", options.gender);
         if (options.minPrice) url.searchParams.append("minPrice", options.minPrice);

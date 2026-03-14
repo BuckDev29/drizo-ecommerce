@@ -9,8 +9,7 @@ import {
   ReactNode,
 } from "react";
 import { CartItem } from "@/types";
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+import { buildApiUrl } from "@/lib/api";
 
 interface CartContextType {
   items: CartItem[];
@@ -44,7 +43,7 @@ async function authedFetch(endpoint: string, method = "GET", body?: any) {
     opts.body = JSON.stringify(body);
   }
 
-  const res = await fetch(`${BASE_URL}/${endpoint}`, opts);
+  const res = await fetch(buildApiUrl(endpoint), opts);
   const data = await res.json();
   if (!res.ok) {
     const msg = (data.message || "").toLowerCase();

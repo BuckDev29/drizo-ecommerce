@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Product } from "@/types";
+import { buildApiUrl } from "@/lib/api";
 import Link from "next/link";
 import Loading from "@/components/Loading";
 import { useCart } from "@/context/CartContext";
@@ -50,7 +51,7 @@ export default function ProductDetail() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`http://localhost:5000/api/products/${id}`);
+        const res = await fetch(buildApiUrl(`products/${id}`));
         if (!res.ok) throw new Error("Producto no encontrado");
         const data = await res.json();
         setProduct(data);

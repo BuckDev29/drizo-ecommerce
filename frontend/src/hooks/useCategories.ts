@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Category } from "@/types";
+import { buildApiUrl } from "@/lib/api";
 
 interface UseCategoriesOptions {
   gender?: "men" | "women" | "unisex" | "";
@@ -16,7 +17,7 @@ export function useCategories(options: UseCategoriesOptions = {}) {
       setError(null);
 
       try {
-        let url = "http://localhost:5000/api/categories";
+        let url = buildApiUrl("categories");
         if (options.gender) {
           url += `?gender=${options.gender}`;
         }

@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+import { buildApiUrl } from "@/lib/api";
 
 function redirectToLogin() {
   if (typeof window === "undefined") return;
@@ -55,7 +55,7 @@ const useApiRequest = () => {
       setLoading(true);
 
       try {
-        const url = `${BASE_URL}/${endpoint}`;
+        const url = buildApiUrl(endpoint);
         let options: RequestInit = {
           method,
           headers: {} as Record<string, string>,

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import type { Product } from "@/types";
+import { buildApiUrl } from "@/lib/api";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -673,7 +674,7 @@ function SearchDrawer({
     }
     setSearching(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/products`);
+      const res = await fetch(buildApiUrl("products"));
       if (!res.ok) throw new Error();
       const all: Product[] = await res.json();
       const lower = term.toLowerCase();
