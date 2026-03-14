@@ -31,6 +31,13 @@ app.get("/", (req, res) => {
   res.json({ message: "Drizo E-commerce API running 🚀" });
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    service: "Drizo API",
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 
 async function startServer() {
