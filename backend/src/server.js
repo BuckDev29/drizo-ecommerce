@@ -42,7 +42,8 @@ async function startServer() {
       console.log(`🚀 Server running on port ${PORT}`);
     });
   } catch (error) {
-    console.error("❌ Error conectando a MySQL:", error.message);
+    console.error("❌ Error conectando a MySQL:");
+    console.error(JSON.stringify(error, null, 2));
   }
 }
 
