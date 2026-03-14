@@ -28,7 +28,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/admin", adminRoutes);
 
 app.get("/", (req, res) => {
-  res.json({ message: "Urban E-commerce API running 🚀" });
+  res.json({ message: "Drizo E-commerce API running 🚀" });
 });
 
 const PORT = process.env.PORT || 5000;
