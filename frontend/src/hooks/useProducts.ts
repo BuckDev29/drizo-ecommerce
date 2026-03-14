@@ -21,10 +21,13 @@ export function useProducts(options: UseProductsOptions = {}) {
 
       try {
         let url = new URL(buildApiUrl("products"));
-        if (options.category) url.searchParams.append("category", options.category);
+        if (options.category)
+          url.searchParams.append("category", options.category);
         if (options.gender) url.searchParams.append("gender", options.gender);
-        if (options.minPrice) url.searchParams.append("minPrice", options.minPrice);
-        if (options.maxPrice) url.searchParams.append("maxPrice", options.maxPrice);
+        if (options.minPrice)
+          url.searchParams.append("minPrice", options.minPrice);
+        if (options.maxPrice)
+          url.searchParams.append("maxPrice", options.maxPrice);
 
         const res = await fetch(url.toString());
         if (!res.ok) {
