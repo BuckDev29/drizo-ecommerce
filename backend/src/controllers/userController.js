@@ -25,7 +25,7 @@ exports.getProfile = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { name, password, shopping_preference } = req.body;
+    const { name, email, password, shopping_preference } = req.body;
 
     const [users] = await db.query("SELECT * FROM users WHERE id = ?", [
       userId,
@@ -34,8 +34,18 @@ exports.updateProfile = async (req, res) => {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-    let updateQuery = "UPDATE users SET name = ?";
-    let queryParams = [name || users[0].name];
+    if (email && email !== users[0].email) {
+      const [existingEmail] = await db.query(
+        "SELECT id FROM users WHERE email = ? AND id != ?",
+        [email, userId],
+      );
+      if (existingEmail.length > 0) {
+        return res.status(400).json({ message: "El email ya está en uso" });
+      }
+    }
+
+    let updateQuery = "UPDATE users SET name = ?, email = ?";
+    let queryParams = [name || users[0].name, email || users[0].email];
 
     if (shopping_preference !== undefined) {
       updateQuery += ", shopping_preference = ?";

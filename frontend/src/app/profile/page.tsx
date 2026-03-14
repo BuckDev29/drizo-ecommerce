@@ -30,6 +30,7 @@ export default function ProfilePage() {
 
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState("");
+  const [saveMessage, setSaveMessage] = useState("");
   const [activeTab, setActiveTab] = useState("compras");
 
   // Gender preference
@@ -39,7 +40,13 @@ export default function ProfilePage() {
 
   // Track saved/original values to detect unsaved changes
   const [savedName, setSavedName] = useState("");
+  const [savedEmail, setSavedEmail] = useState("");
   const [savedGender, setSavedGender] = useState<"men" | "women" | "">("");
+  const [emailInput, setEmailInput] = useState("");
+  const [showEmailEditor, setShowEmailEditor] = useState(false);
+  const [showPasswordEditor, setShowPasswordEditor] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   // Unsaved changes modal
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
@@ -62,9 +69,25 @@ export default function ProfilePage() {
     if (user) setSavedName(user.name);
   }, [user?.email]); // only on initial load, keyed by email
 
+  useEffect(() => {
+    if (user) {
+      setEmailInput(user.email);
+      setSavedEmail(user.email);
+    }
+  }, [user?.email]);
+
   const hasUnsavedChanges = () => {
     if (!user) return false;
-    return user.name !== savedName || genderPreference !== savedGender;
+    const emailChanged = showEmailEditor && emailInput.trim() !== savedEmail;
+    const passwordChanged =
+      showPasswordEditor &&
+      (newPassword.trim().length > 0 || confirmPassword.trim().length > 0);
+    return (
+      user.name !== savedName ||
+      genderPreference !== savedGender ||
+      emailChanged ||
+      passwordChanged
+    );
   };
 
   const handleGenderChange = (value: "men" | "women" | "") => {
@@ -85,6 +108,11 @@ export default function ProfilePage() {
     // Revert to saved values
     if (user) setUser({ ...user, name: savedName });
     setGenderPreference(savedGender);
+    setEmailInput(savedEmail);
+    setShowEmailEditor(false);
+    setShowPasswordEditor(false);
+    setNewPassword("");
+    setConfirmPassword("");
     setShowUnsavedModal(false);
     pendingAction?.();
     setPendingAction(null);
@@ -105,11 +133,39 @@ export default function ProfilePage() {
   const handleSaveProfile = async () => {
     if (!user) return;
     try {
+      const payload: Record<string, string> = { name: user.name };
+
+      const trimmedEmail = emailInput.trim();
+      if (showEmailEditor && trimmedEmail !== savedEmail) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(trimmedEmail)) {
+          setError("Ingresa un correo válido");
+          return;
+        }
+        payload.email = trimmedEmail;
+      }
+
+      if (showPasswordEditor) {
+        if (!newPassword.trim()) {
+          setError("La nueva contraseña no puede estar vacía");
+          return;
+        }
+        if (newPassword.length < 6) {
+          setError("La contraseña debe tener al menos 6 caracteres");
+          return;
+        }
+        if (newPassword !== confirmPassword) {
+          setError("Las contraseñas no coinciden");
+          return;
+        }
+        payload.password = newPassword;
+      }
+
       await apiRequest(
         "user/profile",
         true,
         "PUT",
-        { name: user.name },
+        payload,
         false,
         false,
         localStorage.getItem("token") || "",
@@ -121,9 +177,22 @@ export default function ProfilePage() {
         localStorage.removeItem("genderPreference");
       }
       setSavedName(user.name);
+      if (payload.email) {
+        setUser({ ...user, email: payload.email });
+        setSavedEmail(payload.email);
+      }
       setSavedGender(genderPreference);
+      setSaveMessage("Perfil actualizado correctamente");
+      setError("");
+      setShowEmailEditor(false);
+      setShowPasswordEditor(false);
+      setNewPassword("");
+      setConfirmPassword("");
     } catch (err) {
       console.error("Failed to update profile", err);
+      setSaveMessage("");
+      const message = err instanceof Error ? err.message : "No se pudo guardar";
+      setError(message);
     }
   };
 
@@ -349,6 +418,15 @@ export default function ProfilePage() {
                   Datos personales
                 </h3>
 
+                {saveMessage && (
+                  <p className="mb-6 text-[13px] text-green-600">
+                    {saveMessage}
+                  </p>
+                )}
+                {error && (
+                  <p className="mb-6 text-[13px] text-red-500">{error}</p>
+                )}
+
                 <div className="flex flex-col gap-12 w-full text-left">
                   {/* Nombre y Miembro Desde Form/Info */}
                   <div className="flex flex-col gap-6">
@@ -443,10 +521,31 @@ export default function ProfilePage() {
                           {user.email}
                         </span>
                       </div>
-                      <button className="text-[13px] text-black hover:text-gray-600 transition-colors">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowEmailEditor((prev) => !prev);
+                          setSaveMessage("");
+                        }}
+                        className="text-[13px] text-black hover:text-gray-600 transition-colors"
+                      >
                         Cambiar
                       </button>
                     </div>
+
+                    {showEmailEditor && (
+                      <div className="flex flex-col gap-2 max-w-[400px]">
+                        <label className="text-[11px] text-gray-400 uppercase tracking-widest">
+                          Nuevo correo
+                        </label>
+                        <input
+                          type="email"
+                          value={emailInput}
+                          onChange={(e) => setEmailInput(e.target.value)}
+                          className="w-full text-[15px] text-black border-b border-gray-200 focus:border-black outline-none py-2 transition-colors bg-white"
+                        />
+                      </div>
+                    )}
 
                     <div className="flex items-center justify-between border border-gray-200 p-4 bg-white">
                       <div className="flex items-center gap-3">
@@ -475,10 +574,44 @@ export default function ProfilePage() {
                           Contraseña
                         </span>
                       </div>
-                      <button className="text-[13px] text-black hover:text-gray-600 transition-colors">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowPasswordEditor((prev) => !prev);
+                          setSaveMessage("");
+                        }}
+                        className="text-[13px] text-black hover:text-gray-600 transition-colors"
+                      >
                         Cambiar
                       </button>
                     </div>
+
+                    {showPasswordEditor && (
+                      <div className="flex flex-col gap-4 max-w-[400px]">
+                        <div className="flex flex-col gap-2">
+                          <label className="text-[11px] text-gray-400 uppercase tracking-widest">
+                            Nueva contraseña
+                          </label>
+                          <input
+                            type="password"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            className="w-full text-[15px] text-black border-b border-gray-200 focus:border-black outline-none py-2 transition-colors bg-white"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <label className="text-[11px] text-gray-400 uppercase tracking-widest">
+                            Confirmar contraseña
+                          </label>
+                          <input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="w-full text-[15px] text-black border-b border-gray-200 focus:border-black outline-none py-2 transition-colors bg-white"
+                          />
+                        </div>
+                      </div>
+                    )}
 
                     <button className="flex items-center justify-between border border-gray-200 p-4 bg-white w-full">
                       <div className="flex items-center gap-3">
